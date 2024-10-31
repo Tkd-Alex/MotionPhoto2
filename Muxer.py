@@ -189,7 +189,7 @@ class Muxer:
         exiftool_path = Path(__file__).parent.resolve() / "exiftool.exe"
         if exiftool_path.is_file():
             os.environ["PATH"] += os.pathsep + f"{Path(__file__).parent.resolve()}"
-            
+
         with exiftool.ExifToolHelper(
             encoding="utf-8",
             logger=self.logger if self.verbose is True else None
@@ -197,11 +197,13 @@ class Muxer:
             image_metadata, video_metadata = et.get_metadata(
                 [self.image_fpath, self.video_fpath]
             )
-            
-            for ns in const.NAMESPACES:
-                etree.register_namespace(ns, const.NAMESPACES[ns])
+
+            for ns, val in const.NAMESPACES.items():
+                etree.register_namespace(ns, val)
 
             image_type = self.validate_image(self.image_fpath, metadata=image_metadata)
+            # Create a copy of the original output fpath just in case we have the ovewrite option as True and the ext will be patched
+            backup_output_fpath = self.output_fpath
             self.fix_output_fpath(image_metadata)
             self.validate_video(self.video_fpath, metadata=video_metadata)
 
@@ -215,14 +217,14 @@ class Muxer:
                     f"{self.video_fpath}",
                 ]
             )
-            
+
             try:
                 track_number = extract_track_number(result)
                 self.logger.info("Live Photo keyframe track number: %s", track_number)
 
                 track_duration = extract_track_duration(track_number, result)
                 self.logger.info("Live Photo keyframe: %sus", track_duration)
-                
+
                 self.xmp.find(".//rdf:Description", const.NAMESPACES).set(
                     const.GCAMER_TIMESTAMP_US,
                     str(track_duration),
@@ -233,13 +235,13 @@ class Muxer:
 
             video_data = read_file(self.video_fpath)
             samsung_tail = SamsungTags(video_data, image_type)
-            
+
             result = et.execute(*["-XMP", "-b", f"{self.image_fpath}"])
             if result == "":
                 self.logger.warning("XMP of original file is empty")
             else:
                 self.merge_xmp(result)
-                
+
             self.change_xmpresource(str(samsung_tail.get_video_size()), attribute=const.ITEM_LENGTH, semantic="MotionPhoto")
             self.change_xmpresource(str(samsung_tail.get_image_padding()), attribute=const.ITEM_PADDING, semantic="Primary")
 
@@ -258,7 +260,7 @@ class Muxer:
                     xmp_image,
                 ]
             )
-            
+
             merged_bytes = read_file(xmp_image)
             samsung_tail.set_image_size(len(merged_bytes))
             video_footer = samsung_tail.video_footer()
@@ -277,3 +279,10 @@ class Muxer:
             if self.delete_video is True:
                 os.remove(self.video_fpath)
                 self.logger.debug("Delete: %s", self.video_fpath)
+
+            if self.overwrite is True:
+                f1 = Path(backup_output_fpath)
+                f2 = Path(self.output_fpath)
+                if f1.name != f2.name and f1.exists():
+                    os.remove(f"{f1}")
+                    self.logger.debug("Delete: %s (Reason overwrite=true)", f1)
