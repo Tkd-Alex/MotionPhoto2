@@ -21,8 +21,9 @@ logging.basicConfig(
     handlers=[logging.StreamHandler(sys.stdout)],
     level=logging.DEBUG,
     format="[%(asctime)s] [%(levelname)s] [%(name)s] - %(message)s",
-    datefmt="%d/%m/%Y %H:%M:%S"
+    datefmt="%d/%m/%Y %H:%M:%S",
 )
+
 
 class Muxer:
     def __init__(
@@ -94,7 +95,9 @@ class Muxer:
         self.delete_temp = delete_temp
         self.xmp = etree.fromstring(const.XMP)
 
-    def change_xmpresource(self, value: str, attribute: str = const.ITEM_MIME, semantic: str = "Primary"):
+    def change_xmpresource(
+        self, value: str, attribute: str = const.ITEM_MIME, semantic: str = "Primary"
+    ):
         directory = self.xmp.find(".//Container:Directory", const.NAMESPACES)
         seq = directory.find("rdf:Seq", const.NAMESPACES)
         records = seq.findall(".//rdf:li[@rdf:parseType='Resource']", const.NAMESPACES)
@@ -178,21 +181,24 @@ class Muxer:
                     self.xmp.find(".//rdf:Description", const.NAMESPACES).append(child)
             for attr in xmp_description.attrib:
                 self.logger.info("XMP metadata - copying attribute %s", attr)
-                self.xmp.find(".//rdf:Description", const.NAMESPACES).attrib[attr] = xmp_description.attrib.get(attr)
+                self.xmp.find(".//rdf:Description", const.NAMESPACES).attrib[attr] = (
+                    xmp_description.attrib.get(attr)
+                )
         except:
-            self.logger.info("Could not copy (some of?) the XMP metadata tags from source.")
+            self.logger.info(
+                "Could not copy (some of?) the XMP metadata tags from source."
+            )
 
     def mux(self):
         self.logger.info("Processing %s", self.image_fpath)
 
-	# Add script directory to PATH in case it contains exiftool.exe - useful for packaging, since script path will not be argv[0] nor current directory.
+        # Add script directory to PATH in case it contains exiftool.exe - useful for packaging, since script path will not be argv[0] nor current directory.
         exiftool_path = Path(__file__).parent.resolve() / "exiftool.exe"
         if exiftool_path.is_file():
             os.environ["PATH"] += os.pathsep + f"{Path(__file__).parent.resolve()}"
 
         with exiftool.ExifToolHelper(
-            encoding="utf-8",
-            logger=self.logger if self.verbose is True else None
+            encoding="utf-8", logger=self.logger if self.verbose is True else None
         ) as et:
             image_metadata, video_metadata = et.get_metadata(
                 [self.image_fpath, self.video_fpath]
@@ -231,7 +237,9 @@ class Muxer:
                 )
             except:
                 track_duration = -1
-                self.logger.info("Could not read Live Photo keyframe (source video is probably not from Live Photo). No keyframe will be set.")
+                self.logger.info(
+                    "Could not read Live Photo keyframe (source video is probably not from Live Photo). No keyframe will be set."
+                )
 
             video_data = read_file(self.video_fpath)
             samsung_tail = SamsungTags(video_data, image_type)
@@ -242,8 +250,16 @@ class Muxer:
             else:
                 self.merge_xmp(result)
 
-            self.change_xmpresource(str(samsung_tail.get_video_size()), attribute=const.ITEM_LENGTH, semantic="MotionPhoto")
-            self.change_xmpresource(str(samsung_tail.get_image_padding()), attribute=const.ITEM_PADDING, semantic="Primary")
+            self.change_xmpresource(
+                str(samsung_tail.get_video_size()),
+                attribute=const.ITEM_LENGTH,
+                semantic="MotionPhoto",
+            )
+            self.change_xmpresource(
+                str(samsung_tail.get_image_padding()),
+                attribute=const.ITEM_PADDING,
+                semantic="Primary",
+            )
 
             xmp_updated = self.output_fpath + ".XMP"
             with open(xmp_updated, "wb") as f:

@@ -46,7 +46,7 @@ NAMESPACES = {
     "apple-fi": "http://ns.apple.com/faceinfo/1.0/",
     "stDim": "http://ns.adobe.com/xap/1.0/sType/Dimensions#",
     "hdrgm": "http://ns.adobe.com/hdr-gain-map/1.0/",
-    "xmpNote": "http://ns.adobe.com/xmp/note/"
+    "xmpNote": "http://ns.adobe.com/xmp/note/",
 }
 
 CONTAINER_DIRECTORY = "{" + NAMESPACES["Container"] + "}Directory"
@@ -54,7 +54,9 @@ ITEM_SEMANTIC = "{" + NAMESPACES["Item"] + "}Semantic"
 ITEM_MIME = "{" + NAMESPACES["Item"] + "}Mime"
 ITEM_LENGTH = "{" + NAMESPACES["Item"] + "}Length"
 ITEM_PADDING = "{" + NAMESPACES["Item"] + "}Padding"
-GCAMER_TIMESTAMP_US = "{" + NAMESPACES["GCamera"] + "}MotionPhotoPresentationTimestampUs"
+GCAMER_TIMESTAMP_US = (
+    "{" + NAMESPACES["GCamera"] + "}MotionPhotoPresentationTimestampUs"
+)
 
 MPVD_BOX_SIZE = 8
 MPVD_BOX_NAME = bytes("mpvd", "utf-8")
@@ -63,13 +65,13 @@ SEFD_BOX_SIZE = 8
 SEFD_BOX_NAME = bytes("sefd", "utf-8")
 
 SAMSUNG_TAG_IDS = {
-    "Image_UTC_Data":           bytes([0x00, 0x00, 0x01, 0x0a]),
-    "MCC_Data":                 bytes([0x00, 0x00, 0xa1, 0x0a]),
-    "Camera_Scene_Info":        bytes([0x00, 0x00, 0x01, 0x0d]),
-    "Color_Display_P3":         bytes([0x00, 0x00, 0xc1, 0x0c]),
-    "Camera_Capture_Mode_Info": bytes([0x00, 0x00, 0x61, 0x0c]),
-    "MotionPhoto_Data":         bytes([0x00, 0x00, 0x30, 0x0a]),
-    "MotionPhoto_Version":      bytes([0x00, 0x00, 0x31, 0x0a])
+    "Image_UTC_Data": bytes([0x00, 0x00, 0x01, 0x0A]),
+    "MCC_Data": bytes([0x00, 0x00, 0xA1, 0x0A]),
+    "Camera_Scene_Info": bytes([0x00, 0x00, 0x01, 0x0D]),
+    "Color_Display_P3": bytes([0x00, 0x00, 0xC1, 0x0C]),
+    "Camera_Capture_Mode_Info": bytes([0x00, 0x00, 0x61, 0x0C]),
+    "MotionPhoto_Data": bytes([0x00, 0x00, 0x30, 0x0A]),
+    "MotionPhoto_Version": bytes([0x00, 0x00, 0x31, 0x0A]),
 }
 
 SAMSUNG_SEFH_VERSION = 107

@@ -1,10 +1,7 @@
 import re
 import os
-import struct
 
 from pathlib import Path
-
-import constants as const
 
 
 def extract_track_number(metadata: str) -> str:
@@ -29,4 +26,3 @@ def enrich_fname(fpath: str, enrich: str) -> str:
     p = Path(fpath)
     fname = f"{p.stem}.{enrich}{p.suffix}"
     return os.path.join(p.parent, fname)
-
